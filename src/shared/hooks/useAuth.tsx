@@ -99,7 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Create profile row (handled by DB trigger, but we also set it here as fallback)
       if (data.user) {
-        const { error: profileError } = await supabase.from('profiles').upsert({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: profileError } = await (supabase.from('profiles') as any).upsert({
           id: data.user.id,
           email,
           full_name: fullName,

@@ -127,7 +127,7 @@ export interface Database {
     Tables: {
       profiles: {
         Row: Profile
-        Insert: Omit<Profile, 'created_at' | 'updated_at' | 'tokens' | 'reputation_score' | 'events_attended' | 'hours_volunteered'>
+        Insert: Pick<Profile, 'id' | 'email' | 'full_name' | 'role'> & Partial<Omit<Profile, 'id' | 'email' | 'full_name' | 'role'>>
         Update: Partial<Omit<Profile, 'id' | 'created_at'>>
       }
       organisations: {
