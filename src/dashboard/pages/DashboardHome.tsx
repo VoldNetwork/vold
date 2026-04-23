@@ -65,7 +65,7 @@ export function DashboardHome() {
           icon={<Users className="h-5 w-5" />}
         />
         <StatCard
-          label="Tokens Awarded"
+          label="$VOLD Awarded"
           value={stats.tokensAwarded}
           icon={<Coins className="h-5 w-5" />}
         />

@@ -6,7 +6,7 @@ export function AnalyticsPage() {
     <EmptyState
       icon={<BarChart3 className="h-12 w-12" />}
       title="Analytics"
-      description="Analytics dashboard coming in Phase 5. Track event performance, volunteer engagement, and token distribution."
+      description="Analytics dashboard coming in Phase 5. Track event performance, volunteer engagement, and $VOLD distribution."
     />
   )
 }

@@ -47,9 +47,9 @@ export function RewardsPage() {
     <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
       <h1 className="text-2xl font-bold text-gray-900">Rewards</h1>
 
-      {/* Token balance */}
+      {/* $VOLD balance */}
       <StatCard
-        label="Token Balance"
+        label="$VOLD Balance"
         value={profile?.tokens ?? 0}
         icon={<Coins className="h-6 w-6" />}
       />
@@ -85,12 +85,12 @@ export function RewardsPage() {
 
       {/* Transaction history */}
       <div>
-        <h2 className="font-semibold text-gray-900 mb-3">Token History</h2>
+        <h2 className="font-semibold text-gray-900 mb-3">$VOLD History</h2>
         {transactions.length === 0 ? (
           <EmptyState
             icon={<Coins className="h-10 w-10" />}
             title="No transactions yet"
-            description="Earn tokens by attending events."
+            description="Earn $VOLD by attending events."
           />
         ) : (
           <div className="space-y-2">

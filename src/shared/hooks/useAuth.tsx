@@ -1,149 +1,112 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@shared/lib/supabase'
-import type { Profile } from '@shared/types/database'
+import type { Profile, UserRole } from '@shared/types/database'
+
+/**
+ * POC mock auth — Supabase Auth is intentionally bypassed for now.
+ * A session is just an email persisted in localStorage; the profile is
+ * derived locally so downstream pages keep rendering.
+ */
+
+const STORAGE_KEY = 'vold.mock_profile'
+
+interface MockUser {
+  id: string
+  email: string
+}
 
 interface AuthContextType {
-  user: User | null
+  user: MockUser | null
   profile: Profile | null
-  session: Session | null
+  session: { user: MockUser } | null
   loading: boolean
-  signUp: (email: string, password: string, fullName: string, role: 'volunteer' | 'organiser') => Promise<{ error: Error | null }>
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
+  signUp: (email: string, _password?: string, fullName?: string, role?: UserRole) => Promise<{ error: Error | null }>
+  signIn: (email: string, _password?: string, role?: UserRole) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+function makeProfile(email: string, role: UserRole, fullName?: string): Profile {
+  const now = new Date().toISOString()
+  const trimmed = email.trim().toLowerCase()
+  const name = fullName?.trim() || trimmed.split('@')[0].replace(/[._-]+/g, ' ')
+  return {
+    id: trimmed,
+    email: trimmed,
+    full_name: name.replace(/\b\w/g, (c) => c.toUpperCase()),
+    role,
+    avatar_url: null,
+    bio: null,
+    location: null,
+    tokens: 0,
+    reputation_score: 0,
+    events_attended: 0,
+    hours_volunteered: 0,
+    created_at: now,
+    updated_at: now,
+  }
+}
+
+function loadProfile(): Profile | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Profile) : null
+  } catch {
+    return null
+  }
+}
+
+function saveProfile(profile: Profile | null) {
+  if (profile) localStorage.setItem(STORAGE_KEY, JSON.stringify(profile))
+  else localStorage.removeItem(STORAGE_KEY)
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Fetch profile from Supabase
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    if (error) {
-      console.error('Error fetching profile:', error)
-      return null
-    }
-    return data as Profile
-  }
-
-  // Refresh profile data
-  const refreshProfile = async () => {
-    if (user) {
-      const p = await fetchProfile(user.id)
-      if (p) setProfile(p)
-    }
-  }
-
-  // Listen for auth state changes
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        const p = await fetchProfile(session.user.id)
-        setProfile(p)
-      }
-      setLoading(false)
-    })
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          const p = await fetchProfile(session.user.id)
-          setProfile(p)
-        } else {
-          setProfile(null)
-        }
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
+    setProfile(loadProfile())
+    setLoading(false)
   }, [])
 
-  // Sign up with email + password, then create a profile row
-  const signUp = async (
-    email: string,
-    password: string,
-    fullName: string,
-    role: 'volunteer' | 'organiser'
-  ) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role,
-          },
-        },
-      })
-
-      if (error) return { error }
-
-      // Create profile row (handled by DB trigger, but we also set it here as fallback)
-      if (data.user) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: profileError } = await (supabase.from('profiles') as any).upsert({
-          id: data.user.id,
-          email,
-          full_name: fullName,
-          role,
-        })
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-        }
-      }
-
-      return { error: null }
-    } catch (err) {
-      return { error: err as Error }
-    }
+  const signIn: AuthContextType['signIn'] = async (email, _password, role = 'volunteer') => {
+    if (!email?.trim()) return { error: new Error('Please enter an email') }
+    const existing = loadProfile()
+    const next = existing && existing.email === email.trim().toLowerCase()
+      ? existing
+      : makeProfile(email, role)
+    saveProfile(next)
+    setProfile(next)
+    return { error: null }
   }
 
-  // Sign in with email + password
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      return { error: error ? new Error(error.message) : null }
-    } catch (err) {
-      return { error: err as Error }
-    }
+  const signUp: AuthContextType['signUp'] = async (email, _password, fullName, role = 'volunteer') => {
+    if (!email?.trim()) return { error: new Error('Please enter an email') }
+    const next = makeProfile(email, role, fullName)
+    saveProfile(next)
+    setProfile(next)
+    return { error: null }
   }
 
-  // Sign out
   const signOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
+    saveProfile(null)
     setProfile(null)
-    setSession(null)
   }
+
+  const refreshProfile = async () => {
+    setProfile(loadProfile())
+  }
+
+  const user: MockUser | null = profile ? { id: profile.id, email: profile.email } : null
 
   return (
     <AuthContext.Provider
       value={{
         user,
         profile,
-        session,
+        session: user ? { user } : null,
         loading,
         signUp,
         signIn,

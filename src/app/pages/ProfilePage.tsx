@@ -28,7 +28,7 @@ export function ProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <StatCard
-          label="Tokens"
+          label="$VOLD"
           value={profile.tokens}
           icon={<Coins className="h-5 w-5" />}
         />

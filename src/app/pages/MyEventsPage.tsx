@@ -51,7 +51,7 @@ export function MyEventsPage() {
         <EmptyState
           icon={<Calendar className="h-12 w-12" />}
           title="No events yet"
-          description="Sign up for events to start volunteering and earning tokens."
+          description="Sign up for events to start volunteering and earning $VOLD."
           action={
             <Link to="/discover">
               <Button variant="primary" size="sm" icon={<Search className="h-4 w-4" />}>

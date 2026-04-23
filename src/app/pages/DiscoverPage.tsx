@@ -80,7 +80,7 @@ export function DiscoverPage() {
                     </div>
                     <Badge variant="accent" size="sm">
                       <Coins className="h-3 w-3" />
-                      {event.tokens_reward}
+                      {event.tokens_reward} $VOLD
                     </Badge>
                   </div>
 
