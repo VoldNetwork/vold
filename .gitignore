@@ -21,11 +21,12 @@ package-lock.json
 .env.*
 !.env.example
 
-# Editor directories and files
+# Editor / Claude session local settings
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+.claude/
 *.suo
 *.ntvs*
 *.njsproj
