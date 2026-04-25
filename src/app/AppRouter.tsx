@@ -8,6 +8,7 @@ import { DiscoverPage } from '@app/pages/DiscoverPage'
 import { MyEventsPage } from '@app/pages/MyEventsPage'
 import { RewardsPage } from '@app/pages/RewardsPage'
 import { ProfilePage } from '@app/pages/ProfilePage'
+import { EventInvitePage } from '@app/pages/EventInvitePage'
 
 export function AppRouter() {
   return (
@@ -15,6 +16,10 @@ export function AppRouter() {
       <AuthProvider>
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
+          {/* Public invite landing — anyone with the link can view a shared
+              event. Lives outside ProtectedRoute so signed-out invitees
+              still see the page. */}
+          <Route path="/e/:id" element={<EventInvitePage />} />
           <Route
             element={
               <ProtectedRoute requiredRole="volunteer">
