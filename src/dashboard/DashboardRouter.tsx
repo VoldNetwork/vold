@@ -5,6 +5,7 @@ import { DashboardLayout } from '@dashboard/layouts/DashboardLayout'
 import { DashboardAuthPage } from '@dashboard/pages/AuthPage'
 import { DashboardHome } from '@dashboard/pages/DashboardHome'
 import { EventsPage } from '@dashboard/pages/EventsPage'
+import { CreateEventPage } from '@dashboard/pages/CreateEventPage'
 import { VolunteersPage } from '@dashboard/pages/VolunteersPage'
 import { AnalyticsPage } from '@dashboard/pages/AnalyticsPage'
 import { SettingsPage } from '@dashboard/pages/SettingsPage'
@@ -24,7 +25,7 @@ export function DashboardRouter() {
           >
             <Route index element={<DashboardHome />} />
             <Route path="events" element={<EventsPage />} />
-            <Route path="events/new" element={<EventsPage />} />
+            <Route path="events/new" element={<CreateEventPage />} />
             <Route path="volunteers" element={<VolunteersPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="settings" element={<SettingsPage />} />
