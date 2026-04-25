@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Workspace lockfile lives at the monorepo root only — running `npm install`
+# from inside this dir would regenerate one and confuse npm workspaces.
+package-lock.json
+
 # Environment files (NEVER commit secrets)
 .env
 .env.*
